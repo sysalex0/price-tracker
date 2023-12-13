@@ -1,0 +1,21 @@
+version: '3'
+services:
+  datastore:
+    container_name: datastore
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: price-tracker
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - network
+
+volumes:
+  pgdata:
+
+networks:
+  network:
