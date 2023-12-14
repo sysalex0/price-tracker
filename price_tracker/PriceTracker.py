@@ -21,7 +21,7 @@ class PriceTracker(ABC):
         pass
 
     @abstractmethod
-    def filter_existed_products(self, products):
+    def filter_new_or_lower_price_products(self, products):
         pass
 
 

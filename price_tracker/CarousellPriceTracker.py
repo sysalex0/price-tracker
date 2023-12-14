@@ -11,6 +11,9 @@ from model.Product import Product
 from price_tracker.PriceTracker import PriceTracker
 from urllib.parse import urlparse
 
+from repository.ProductRepository import find_first_by_platform_and_product_unique_id_order_by_price_asc
+
+
 class CarousellPriceTracker(PriceTracker):
     @property
     def crawl_base_url(self):
@@ -127,5 +130,13 @@ class CarousellPriceTracker(PriceTracker):
                 currency = Currency.HKD
         return currency
 
-    def filter_existed_products(self, products):
-        return products
+    def filter_new_or_lower_price_products(self, products):
+        new_or_lower_price_products = []
+        for incoming_product in products:
+            print('product_unique_id:', incoming_product.product_unique_id)
+            product = find_first_by_platform_and_product_unique_id_order_by_price_asc(self.platform, incoming_product.product_unique_id)
+            if product is not None and incoming_product.price >= product.price:
+                continue
+            else:
+                new_or_lower_price_products.append(incoming_product)
+        return new_or_lower_price_products

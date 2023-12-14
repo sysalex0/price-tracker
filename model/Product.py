@@ -20,5 +20,5 @@ class Product(Base):
     record_update_time = Column(DateTime(timezone=True), default=func.now())
 
     def __repr__(self):
-        return f"Product(platform={self.platform!r}, search_keyword={self.search_keyword!r}, product_unique_id={self.product_unique_id!r}, " \
-               f"currency={self.currency!r}, price={self.price!r}, approx_posting_time={self.approx_posting_time!r})"
+        return f'Product(platform={self.platform!r}, search_keyword={self.search_keyword!r}, product_unique_id={self.product_unique_id!r}, ' \
+               f'currency={self.currency!r}, price={self.price!r}, approx_posting_time={self.approx_posting_time.strftime("%Y-%m-%d %H:%M:%S")!r})'
