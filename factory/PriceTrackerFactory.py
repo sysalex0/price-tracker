@@ -1,8 +1,8 @@
 from constant.Enums import Platform
-from price_tracker.CarosellPriceTracker import CarosellPriceTracker
+from price_tracker.CarousellPriceTracker import CarousellPriceTracker
 
 platform_price_tracker_dict = {
-    Platform.CAROUSELL: CarosellPriceTracker()
+    Platform.CAROUSELL: CarousellPriceTracker()
 }
 
 

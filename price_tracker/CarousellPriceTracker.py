@@ -9,9 +9,9 @@ from fake_useragent import UserAgent
 from constant.Enums import Currency, Platform
 from model.Product import Product
 from price_tracker.PriceTracker import PriceTracker
+from urllib.parse import urlparse
 
-
-class CarosellPriceTracker(PriceTracker):
+class CarousellPriceTracker(PriceTracker):
     @property
     def crawl_base_url(self):
         return 'https://www.carousell.com.hk/search/{search_keyword}?addRecent=true'
@@ -37,7 +37,7 @@ class CarosellPriceTracker(PriceTracker):
         products = []
         for product in products_soup_result:
             raw_product = self.extract_raw_product_from_soup(product)
-            product = self.to_product_model(raw_product)
+            product = self.to_product_model(tracking_keyword, raw_product)
             products.append(product)
 
         return products
@@ -46,6 +46,8 @@ class CarosellPriceTracker(PriceTracker):
         # get raw data
         # div[1]/a[2]
         url = 'https://www.carousell.com.hk' + product_soup_result.find_all('div')[0].find_all('a')[1].get('href')
+        url_path = urlparse(url).path
+        product_unique_id = url_path[url_path.rfind("-")+1:].replace('/', '')
         # div[1]/a[2]/p[1]/text()
         title = product_soup_result.find_all('div')[0].find_all('a')[1].find_all('p')[0].get_text(strip=True)
         if title == 'Bumped':
@@ -60,6 +62,7 @@ class CarosellPriceTracker(PriceTracker):
             r'\d+ \w+ ago')).get_text(strip=True)
 
         raw_product = {
+            'product_unique_id': product_unique_id,
             'title': title,
             'url': url,
             'price': raw_price,
@@ -68,24 +71,28 @@ class CarosellPriceTracker(PriceTracker):
         # print(raw_product)
         return raw_product
 
-    def to_product_model(self, raw_product):
+    def to_product_model(self, tracking_keyword, raw_product):
         # process
         match = re.match(r"(\w+)\$(\d+)", raw_product['price'])
         raw_currency = match.group(1)
 
+        product_unique_id = raw_product['product_unique_id'].strip()
         title = raw_product['title'].strip()
+        search_keyword = tracking_keyword.strip()
         currency = self.to_currency(raw_currency)
         price = float(match.group(2))
         url = raw_product['url'].strip()
-        posting_time = self.convert_relative_time_to_datetime(raw_product['relative_time'])
+        approx_posting_time = self.convert_relative_time_to_datetime(raw_product['relative_time'])
 
         return Product(
             platform=self.platform,
+            search_keyword=search_keyword,
+            product_unique_id=product_unique_id,
             title=title,
             currency=currency,
             price=price,
             url=url,
-            posting_time=posting_time,
+            approx_posting_time=approx_posting_time,
         )
 
     def convert_relative_time_to_datetime(self, raw_time):
@@ -122,4 +129,3 @@ class CarosellPriceTracker(PriceTracker):
 
     def filter_existed_products(self, products):
         return products
-

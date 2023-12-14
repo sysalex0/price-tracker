@@ -8,14 +8,17 @@ class Product(Base):
     __tablename__ = 'product'
 
     id = Column(Integer, primary_key=True)
-    platform = Column(Enum(Platform))
+    platform = Column(Enum(Platform), index=True)
+    search_keyword = Column(String(1024), index=True)
+    product_unique_id = Column(String(1024), index=True)
     title = Column(String(1024))
     currency = Column(Enum(Currency))
-    price = Column(Double())
+    price = Column(Double(), index=True)
     url = Column(Text())
-    posting_time = Column(DateTime(timezone=True))
+    approx_posting_time = Column(DateTime(timezone=True), index=True)
     record_creation_time = Column(DateTime(timezone=True), default=func.now())
     record_update_time = Column(DateTime(timezone=True), default=func.now())
 
     def __repr__(self):
-        return f"Product(id={self.id!r}, name={self.title!r}, price={self.price!r}, posting_time={self.posting_time!r})"
+        return f"Product(platform={self.platform!r}, search_keyword={self.search_keyword!r}, product_unique_id={self.product_unique_id!r}, " \
+               f"currency={self.currency!r}, price={self.price!r}, approx_posting_time={self.approx_posting_time!r})"
