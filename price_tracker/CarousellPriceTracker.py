@@ -11,7 +11,7 @@ from model.Product import Product
 from price_tracker.PriceTracker import PriceTracker
 from urllib.parse import urlparse
 
-from repository.ProductRepository import find_first_by_platform_and_product_unique_id_order_by_price_asc
+from repository.ProductRepository import find_first_product_by_platform_and_product_unique_id_order_by_price_asc
 
 
 class CarousellPriceTracker(PriceTracker):
@@ -59,7 +59,7 @@ class CarousellPriceTracker(PriceTracker):
 
         # div[1]/a[2]/div[2]/p
         raw_price = product_soup_result.find_all('div')[0].find_all('a')[1].find('p', attrs={
-            'title': lambda value: value and re.match(r'\w+\$\d+', value)}).get('title')
+            'title': lambda value: value and re.match(r"(\w+)\$([0-9,]+(?:\.[0-9]+)?)", value)}).get('title')
         # div[1]/a[1]/div[2]/div/p
         raw_relative_time = product_soup_result.find_all('div')[0].find_all('a')[0].find('p', text=re.compile(
             r'\d+ \w+ ago')).get_text(strip=True)
@@ -76,14 +76,14 @@ class CarousellPriceTracker(PriceTracker):
 
     def to_product_model(self, tracking_keyword, raw_product):
         # process
-        match = re.match(r"(\w+)\$(\d+)", raw_product['price'])
+        match = re.match(r"(\w+)\$([0-9,]+(?:\.[0-9]+)?)", raw_product['price'])
         raw_currency = match.group(1)
 
         product_unique_id = raw_product['product_unique_id'].strip()
         title = raw_product['title'].strip()
         search_keyword = tracking_keyword.strip()
         currency = self.to_currency(raw_currency)
-        price = float(match.group(2))
+        price = float(match.group(2).replace(",", ""))
         url = raw_product['url'].strip()
         approx_posting_time = self.convert_relative_time_to_datetime(raw_product['relative_time'])
 
@@ -133,8 +133,7 @@ class CarousellPriceTracker(PriceTracker):
     def filter_new_or_lower_price_products(self, products):
         new_or_lower_price_products = []
         for incoming_product in products:
-            print('product_unique_id:', incoming_product.product_unique_id)
-            product = find_first_by_platform_and_product_unique_id_order_by_price_asc(self.platform, incoming_product.product_unique_id)
+            product = find_first_product_by_platform_and_product_unique_id_order_by_price_asc(self.platform, incoming_product.product_unique_id)
             if product is not None and incoming_product.price >= product.price:
                 continue
             else:
