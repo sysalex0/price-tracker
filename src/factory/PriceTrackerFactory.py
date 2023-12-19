@@ -7,8 +7,7 @@ platform_price_tracker_dict = {
 
 
 def get_platform_price_tracker(platform):
-    platform_price_tracker = platform_price_tracker_dict[platform]
-    if platform_price_tracker is not None:
-        return platform_price_tracker
+    if platform in platform_price_tracker_dict:
+        return platform_price_tracker_dict[platform]
     else:
         raise Exception('Unsupported platform')
