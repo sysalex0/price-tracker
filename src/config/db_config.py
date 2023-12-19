@@ -12,7 +12,8 @@ def init_db():
 
 
 connection_string = f'postgresql+psycopg2://{secrets["DATABASE_USER"]}:{secrets["DATABASE_PASSWORD"]}@{secrets["DATABASE_HOST"]}:{secrets["DATABASE_PORT"]}/{secrets["DATABASE_NAME"]}'
-engine = create_engine(connection_string, echo=True, future=True)
+print(f"connection_string: {connection_string}")
+engine = create_engine(connection_string, future=True)
 
 Session = ScopedSession(sessionmaker())
 Session(bind=engine)

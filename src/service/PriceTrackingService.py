@@ -13,7 +13,9 @@ def fetch_and_save_new_products(price_tracking_configs):
         for platform in price_tracking_config['platforms']:
             price_tracker = get_platform_price_tracker(platform)
             products = price_tracker.extract_products(price_tracking_config['tracking_keyword'])
+            print(f"[{len(products)}] products fetched for platform [{platform.name}]")
             new_products = price_tracker.filter_new_or_lower_price_products(products)
+            print(f"[{len(new_products)}] products to save in database for platform [[{platform.name}]]")
             price_tracker.save_products(new_products)
 
 
@@ -38,6 +40,7 @@ def notify_new_good_deals(price_tracking_configs):
             products_never_notified = [product for product in good_deals_in_platform if product.id in product_ids_never_notified]
             products.extend(products_never_notified)
 
+        print(f"[{len(products)}] products match condition to notify")
         for product in products:
             html_messages = product_to_html_message(product)
             send_message_to_telegram(html_messages)
